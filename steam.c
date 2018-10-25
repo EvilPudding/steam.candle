@@ -11,7 +11,9 @@
 
 void c_steam_init(c_steam_t *self)
 {
-	SteamAPI_Init();
+	strcpy(self->persona_name, "not connected");
+	int started = SteamAPI_Init();
+	if(!started) return;
 	self->client = SteamClient();
 	HSteamPipe hsteampipe = SteamAPI_ISteamClient_CreateSteamPipe(self->client);
 	HSteamUser hsteamuser = SteamAPI_ISteamClient_ConnectToGlobalUser(self->client, hsteampipe);
@@ -23,8 +25,11 @@ void c_steam_init(c_steam_t *self)
 	uint64 steamid = SteamAPI_ISteamUser_GetSteamID((intptr_t)isteamuser);
 	printf("SteamID: %llu\n", steamid);
 
-	self->persona_name = SteamAPI_ISteamFriends_GetPersonaName((intptr_t)isteamfriends);
+	const char *persona_name = SteamAPI_ISteamFriends_GetPersonaName((intptr_t)isteamfriends);
 	printf("Persona name: %s\n", self->persona_name);
+
+	strncpy(self->persona_name, persona_name, sizeof(self->persona_name));
+
 	printf("OVERLAY? %d\n", SteamAPI_ISteamUtils_IsOverlayEnabled(self->client));
 }
 
